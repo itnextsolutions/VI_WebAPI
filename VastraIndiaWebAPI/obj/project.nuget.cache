@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "aJXStS3kU+ZDQp745TwX1NpxZoD5b9blRo1seG44UfXYNXNlC1mjBllsHVtBKVH032n+rd0JkvYi+aHqDm4Trg==",
+  "dgSpecHash": "9/HDwf47vbSJGLok4Kj7sAl5aVLbSg/8hnV6VOL1iE9Fy4u0bMNWvtcwIOzHVMF+z6hG7poGJW47hJNKqi6pTw==",
   "success": true,
-  "projectFilePath": "C:\\Projects\\VastraIndia\\VastraIndia\\VastraIndiaWebAPI\\VastraIndiaWebAPI.csproj",
+  "projectFilePath": "C:\\VastraIndia\\VastraIndia\\VastraIndiaWebAPI\\VastraIndiaWebAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\HP\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.0\\microsoft.aspnetcore.authentication.jwtbearer.6.0.0.nupkg.sha512",
     "C:\\Users\\HP\\.nuget\\packages\\microsoft.csharp\\4.6.0\\microsoft.csharp.4.6.0.nupkg.sha512",
