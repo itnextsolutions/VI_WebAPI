@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Nancy.Json;
@@ -21,11 +22,14 @@ namespace VastraIndiaWebAPI.Controllers
 {
     //[Route("api/[controller]")]
     //[ApiController]
+
     public class ProductController : ControllerBase
     {
+
         DataTable dt = new DataTable();
         ProductDAL objProductDAL = new ProductDAL();
         SqlHelper objsqlHelper = new SqlHelper();
+        SaveImageDAL saveImage = new SaveImageDAL();
 
         [HttpGet]
         [Route("api/Product/GetProdutCatDropDown")]
@@ -49,7 +53,7 @@ namespace VastraIndiaWebAPI.Controllers
 
         //Products start
         // GET: api/<ProductController>
-        [HttpGet]
+        [HttpGet,Authorize]
         [Route("api/Product/GetProducts")]
         public JsonResult GetProduts()
         {
@@ -92,51 +96,186 @@ namespace VastraIndiaWebAPI.Controllers
         [Route("api/Product/DeleteProduct")]
         [HttpDelete("{id}")]
         // DELETE api/<ProductController>/5
-        public void Delete(int id)
+        public JsonResult Delete(int id)
         {
 
             dt = objProductDAL.DeleteProduct(id);
-
+            return new JsonResult("Deleted Successfully");
         }
+
+
 
         // POST api/<ProductController>
         [Route("api/Product/InsertProduct")]
         [HttpPost]
-        public IActionResult Post([FromBody] ProductModel product)
+        public async Task<ActionResult> SaveProduct([FromForm] ProductModel product)
         {
+            var MenSidephotoName = "";
+            var MenBackphotoName = "";
+            var MenSizeChartName = "";
+            var WomenDescription = "women";   //Later Comment This
+            var WomenFrontPhoto = "";
+            var WomenSidePhoto = "";
+            var WomenBackPhoto = "";
+            var WomenSizeChart = "";
+
+            var Ext = System.IO.Path.GetExtension(product.MenFrontImgFile.FileName);
+
+            var MenFrontPhoto = product.Product_Title  + "MenFront" /*+ DateTime.Now.ToString("dd-MM-yyyy-HHmm")*/ + Ext;
+
+            if (product.MenSideImgFile != null)
+            {
+                MenSidephotoName = product.Product_Title + "MenSide" /*+DateTime.Now.ToString("dd-MM-yyyy-HHmm")*/ + Ext;
+            }
+
+            if (product.MenBackImgFile != null)
+            {
+                MenBackphotoName = product.Product_Title + "MenBack" + Ext;
+            }
+
+            if (product.MenSizeChartImgFile != null)
+            {
+                MenSizeChartName = product.Product_Title + "MenSizeChart" + Ext;
+            }
+
+            if (product.WomenFrontImgFile != null)
+            {
+                WomenFrontPhoto = product.Product_Title + "WomenFront" + Ext;
+            }
+
+            if (product.WomenFrontImgFile != null)
+            {
+                WomenSidePhoto = product.Product_Title + "WomenSide" + Ext;
+            }
+
+            if (product.WomenFrontImgFile != null)
+            {
+                WomenBackPhoto = product.Product_Title + "WomenBack" + Ext;
+            }
+
+            if (product.WomenSizeChartImgFile != null)
+            {
+                WomenSizeChart = product.Product_Title + "WomenSizeChart" + Ext;
+            }
 
 
-            if (product.ColorId != null & product.SizeId != null)
+            dt = objProductDAL.GetProductCategoryById(product.Category_Id);
+            string CategoryName = (string)dt.Rows[0]["Category_Name"];
+
+            //  var ProductFolderbyCategoryName = Path.Combine("C:", "Projects", "Alpesh_VastraPro", "Vastra", "src", "assets", "img", CategoryName);
+
+            var ProductFolderbyCategoryName = Path.Combine("C:", "Projects", "VastraIndia", "Vastra", "src", "assets", "img", CategoryName);
+
+            if (!Directory.Exists(ProductFolderbyCategoryName))
             {
-                string xmlcolor = objsqlHelper.ListStrAryToXML(product.ColorId, "colors", "colorcode", "colorid");
-                string xmlsize = objsqlHelper.ListStrAryToXML(product.SizeId, "size", "sizecode", "sizeid");
-                dt = objProductDAL.InsertProduct((int)product.Category_Id, product.SubCategory_Id, product.Product_Title, product.Product_Description, product.Image_Name, xmlcolor, xmlsize);
-                return new JsonResult("Added Successfully");
+                //If Directory (Folder) does not exists. Create it.
+                Directory.CreateDirectory(ProductFolderbyCategoryName);
             }
-            else
-            {
-                return new JsonResult("Color and Size");
-            }
+
+
+            string ColorId = product.ColorId;
+            List<int> ColorIds = ColorId.Split(',').Select(int.Parse).ToList();
+            int[] ColorIdsInArray = ColorIds.ToArray();
+
+            string SizeId = product.SizeId;
+            List<int> SizeIdS = SizeId.Split(',').Select(int.Parse).ToList();
+            int[] SizeIdSInArray = SizeIdS.ToArray();
+
+            string xmlcolor = objsqlHelper.ListStrAryToXML(ColorIdsInArray, "colors", "colorcode", "colorid");
+            string xmlsize = objsqlHelper.ListStrAryToXML(SizeIdSInArray, "size", "sizecode", "sizeid");
+            dt = objProductDAL.InsertProduct((int)product.Category_Id, product.SubCategory_Id, product.Product_Title, product.Product_Description, MenFrontPhoto, MenSidephotoName, MenBackphotoName, MenSizeChartName, WomenDescription /*product.WomenProductDescription*/, WomenFrontPhoto,WomenSidePhoto, WomenBackPhoto, WomenSizeChart, xmlcolor, xmlsize);
+
+            // var SaveImage = saveImage.SaveProductImagesAsync(product.formFile, product.file1, product.file2, FileName, SidephotoName, BackphotoName, ProductFolderbyCategoryName);
+            var SaveImage = saveImage.SaveProductImagesAsync(product.MenFrontImgFile, product.MenSideImgFile, product.MenBackImgFile,product.MenSizeChartImgFile, MenFrontPhoto, MenSidephotoName, MenBackphotoName, MenSizeChartName, product.WomenFrontImgFile,product.WomenSideImgFile,product.WomenBackImgFile,product.WomenSizeChartImgFile, WomenFrontPhoto, WomenSidePhoto, WomenBackPhoto,WomenSizeChart, ProductFolderbyCategoryName);
+            return new JsonResult("Added Successfully");
+
         }
-
         // PUT api/<ProductController>/5
         [Route("api/Product/UpdateProduct")]
         //  [HttpPut("{id}")]
         [HttpPut]
-        public IActionResult Put([FromBody] ProductModel product)
+        public async Task<ActionResult> UpdateProduct([FromForm] ProductModel product)
         {
+            var MenSidephotoName = "";
+            var MenBackphotoName = "";
+            var MenSizeChartName = "";
+            var WomenDescription = "women";
+            var WomenFrontPhoto = "";
+            var WomenSidePhoto = "";
+            var WomenBackPhoto = "";
+            var WomenSizeChart = "";
+            var Ext = System.IO.Path.GetExtension(product.MenFrontImgFile.FileName);
 
-            if (product.Product_Id != 0)
+            var MenFrontPhoto = product.Product_Title + "_" + "Front" + "_" + DateTime.Now.ToString("dd-MM-yyyy-HHmm") + Ext;
+
+
+            if (product.MenSideImgFile != null)
             {
-                string xmlcolor = objsqlHelper.ListStrAryToXML(product.ColorId, "colors", "colorcode", "colorid");
-                string xmlsize = objsqlHelper.ListStrAryToXML(product.SizeId, "size", "sizecode", "sizeid");
-                dt = objProductDAL.UpdateProduct(product.Product_Id, (int)product.Category_Id, product.SubCategory_Id, product.Product_Title, product.Product_Description, product.Image_Name, xmlcolor, xmlsize);
-                return new JsonResult("Updated Successfully");
+                MenSidephotoName = product.Product_Title + "_" + "Side" + "_" + DateTime.Now.ToString("dd-MM-yyyy-HHmm") + Ext;
             }
-            return new JsonResult("Product_Id is not valid");
+
+            if (product.MenBackImgFile != null)
+            {
+                MenBackphotoName = product.Product_Title + "_" + "Back" + "_" + DateTime.Now.ToString("dd-MM-yyyy-HHmm") + Ext;
+            }
+
+            if (product.MenSizeChartImgFile != null)
+            {
+                MenSizeChartName = product.Product_Title + "MenSizeChart" + Ext;
+            }
+
+            if (product.WomenFrontImgFile != null)
+            {
+                WomenFrontPhoto = product.Product_Title + "WomenFront" + Ext;
+            }
+
+            if (product.WomenFrontImgFile != null)
+            {
+                WomenSidePhoto = product.Product_Title + "WomenSide" + Ext;
+            }
+
+            if (product.WomenFrontImgFile != null)
+            {
+                WomenBackPhoto = product.Product_Title + "WomenBack" + Ext;
+            }
+
+            if (product.WomenSizeChartImgFile != null)
+            {
+                WomenSizeChart = product.Product_Title + "WomenSizeChart" + Ext;
+            }
+
+
+            dt = objProductDAL.GetProductCategoryById(product.Category_Id);
+            string CategoryName = (string)dt.Rows[0]["Category_Name"];
+
+            var ProductFolderbyCategoryName = Path.Combine("C:", "Projects", "VastraIndia", "Vastra", "src", "assets", "img", CategoryName);
+
+           // var ProductFolderbyCategoryName = Path.Combine("C:", "Projects", "Alpesh_VastraPro", "Vastra", "src", "assets", "img", CategoryName);
+            if (!Directory.Exists(ProductFolderbyCategoryName))
+            {
+                //If Directory (Folder) does not exists. Create it.
+                Directory.CreateDirectory(ProductFolderbyCategoryName);
+            }
+
+            string ColorId = product.ColorId;
+            List<int> ColorIds = ColorId.Split(',').Select(int.Parse).ToList();
+            int[] ColorIdsInArray = ColorIds.ToArray();
+
+            string SizeId = product.SizeId;
+            List<int> SizeIdS = SizeId.Split(',').Select(int.Parse).ToList();
+            int[] SizeIdSInArray = SizeIdS.ToArray();
+
+            string xmlcolor = objsqlHelper.ListStrAryToXML(ColorIdsInArray, "colors", "colorcode", "colorid");
+            string xmlsize = objsqlHelper.ListStrAryToXML(SizeIdSInArray, "size", "sizecode", "sizeid");
+
+            dt = objProductDAL.UpdateProduct(product.Product_Id, (int)product.Category_Id, 4, product.Product_Title, product.Product_Description, MenFrontPhoto, MenSidephotoName, MenBackphotoName, MenSizeChartName, WomenDescription /*product.WomenProductDescription*/, WomenFrontPhoto, WomenSidePhoto, WomenBackPhoto, WomenSizeChart, xmlcolor, xmlsize);
+            var SaveImage = saveImage.SaveProductImagesAsync(product.MenFrontImgFile, product.MenSideImgFile, product.MenBackImgFile, product.MenSizeChartImgFile, MenFrontPhoto, MenSidephotoName, MenBackphotoName, MenSizeChartName, product.WomenFrontImgFile, product.WomenSideImgFile, product.WomenBackImgFile, product.WomenSizeChartImgFile, WomenFrontPhoto, WomenSidePhoto, WomenBackPhoto, WomenSizeChart, ProductFolderbyCategoryName);
+            return new JsonResult("Updated Successfully");
 
         }
+
         //Products end
+
 
         //Category start
         [Route("api/Product/GetCategory")]
@@ -189,20 +328,54 @@ namespace VastraIndiaWebAPI.Controllers
 
         }
 
+
         [Route("api/Product/InsertCategory")]
         [HttpPost("")]
-        public IActionResult Post([FromBody] CategoryModel category)
+        public async Task<ActionResult> SaveProductcategory([FromForm] CategoryModel category)
         {
-            dt = objProductDAL.InsertCategory(category.Category_Name, category.Category_Photo, category.Category_Description);
+            var Ext = System.IO.Path.GetExtension(category.formFile.FileName);
+
+            var FileName = category.Category_Name + "_" + DateTime.Now.ToString("dd/MM/yyyy") + Ext;
+
+          //  var CategoryFolderName = Path.Combine("C:", "Projects",  "Alpesh_VastraPro", "Vastra", "src", "assets", "img","category");
+
+            var CategoryFolderName = Path.Combine("C:", "Projects", "VastraIndia", "Vastra", "src", "assets", "img", "category");
+
+            if (!Directory.Exists(CategoryFolderName))
+            {
+                //If Directory (Folder) does not exists. Create it.
+                Directory.CreateDirectory(CategoryFolderName);
+            }
+
+            dt = objProductDAL.InsertCategory(category.Category_Name, FileName, category.Category_Description);
+            var SaveImage = saveImage.SaveImagesAsync(category.formFile, FileName, CategoryFolderName);
             return new JsonResult("Added Successfully");
+
         }
+
+
         // PUT api/<ProductController>/5
         [Route("api/Product/UpdateCategory")]
         // [HttpPut("{id}")]
         [HttpPut]
-        public IActionResult Put([FromBody] CategoryModel category)
+        public async Task<ActionResult> UpdateProductcategory([FromForm] CategoryModel category)
         {
-            dt = objProductDAL.UpdateCategory(category.Category_Id, category.Category_Name, category.Category_Photo, category.Category_Description);
+
+            var Ext = System.IO.Path.GetExtension(category.formFile.FileName);
+
+            var FileName = category.Category_Name + "_" + DateTime.Now.ToString("dd/MM/yyyy") + Ext;
+       
+
+        // var CategoryFolderName = Path.Combine("C:", "Projects" ,"Alpesh_VastraPro", "Vastra", "src", "assets", "img", "category");
+            var CategoryFolderName = Path.Combine("C:", "Projects", "VastraIndia", "Vastra", "src", "assets", "img", "category");
+
+            if (!Directory.Exists(CategoryFolderName))
+            {
+                //If Directory (Folder) does not exists. Create it.
+                Directory.CreateDirectory(CategoryFolderName);
+            }
+            dt = objProductDAL.UpdateCategory(category.Category_Id, category.Category_Name, FileName, category.Category_Description);
+            var SaveImage = saveImage.SaveImagesAsync(category.formFile, FileName, CategoryFolderName);
             return new JsonResult("Updated Successfully");
         }
         //Category end
@@ -443,7 +616,7 @@ namespace VastraIndiaWebAPI.Controllers
         //SubCategory end
 
 
-
+        //Get Sub Cat Dropdown by Cat id
         [Route("api/Product/GetSubCatByCatid")]
         [HttpGet("{id}")]
         public IActionResult GetSubCatByCatid(int id)
@@ -624,6 +797,8 @@ namespace VastraIndiaWebAPI.Controllers
 
         //ProductPagination End
 
+
+
+
     }
 }
-

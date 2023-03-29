@@ -20,5 +20,7 @@ namespace VastraIndiaWebAPI.Models
         public DateTime Created_Date { get; set; }
       
         public DateTime Updated_Date { get; set; }
+
+        public string ColorName { get; set; }
     }
 }

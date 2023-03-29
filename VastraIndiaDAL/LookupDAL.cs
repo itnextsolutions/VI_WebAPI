@@ -105,9 +105,9 @@ namespace VastraIndiaDAL
             return dt;
         }
 
-        public DataTable InsertLookupDetails(int Lookup_Id, string Description)
+        public DataTable InsertLookupDetails(int Lookup_Id, string Description, string ColorName)
         {
-            SqlParameter[] param = new SqlParameter[2];
+            SqlParameter[] param = new SqlParameter[3];
 
             param[0] = new SqlParameter();
             param[0].ParameterName = "@Lookup_Id";
@@ -119,13 +119,18 @@ namespace VastraIndiaDAL
             param[1].Value = Description;
             param[1].Direction = ParameterDirection.Input;
 
+            param[2] = new SqlParameter();
+            param[2].ParameterName = "@ColorName";
+            param[2].Value = ColorName;
+            param[2].Direction = ParameterDirection.Input;
+
             dt = objsqlHelper.ExecuteDataTable(objsqlHelper.GetConnection(), CommandType.StoredProcedure, "SP_InsertLookupDetails", param);
             return dt;
         }
 
-        public DataTable UpdateLookupDetails(int LookupDetailsId, int Lookup_Id, string Description)
+        public DataTable UpdateLookupDetails(int LookupDetailsId, int Lookup_Id, string Description, string ColorName)
         {
-            SqlParameter[] param = new SqlParameter[3];
+            SqlParameter[] param = new SqlParameter[4];
 
             param[0] = new SqlParameter();
             param[0].ParameterName = "@Lookup_Details_Id";
@@ -141,6 +146,11 @@ namespace VastraIndiaDAL
             param[2].ParameterName = "@Description";
             param[2].Value = Description;
             param[2].Direction = ParameterDirection.Input;
+
+            param[3] = new SqlParameter();
+            param[3].ParameterName = "@ColorName";
+            param[3].Value = ColorName;
+            param[3].Direction = ParameterDirection.Input;
 
             dt = objsqlHelper.ExecuteDataTable(objsqlHelper.GetConnection(), CommandType.StoredProcedure, "SP_UpdateLookupDetails", param);
             return dt;

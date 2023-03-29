@@ -19,9 +19,9 @@ namespace VastraIndiaWebAPI.Models
 
         public string Image_Name { get; set; }
         public int IsActive { get; set; }
+        public IFormFile formFile { get; set; }
+        //public DateTime Created_Date { get; set; }
 
-        public DateTime Created_Date { get; set; }
-
-        public DateTime Updated_Date { get; set; }
+        //public DateTime Updated_Date { get; set; }
     }
 }

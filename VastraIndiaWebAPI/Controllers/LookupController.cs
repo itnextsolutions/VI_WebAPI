@@ -147,7 +147,7 @@ namespace VastraIndiaWebAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] LookupDetailsModel lookupDetail)
         {
-            dt = lookup.InsertLookupDetails(lookupDetail.Lookup_Id, lookupDetail.Description);
+            dt = lookup.InsertLookupDetails(lookupDetail.Lookup_Id, lookupDetail.Description, lookupDetail.ColorName);
             return new JsonResult("Added Successfully");
         }
 
@@ -159,12 +159,13 @@ namespace VastraIndiaWebAPI.Controllers
             if (lookupDetail.Lookup_Details_Id != 0)
             {
                 ;
-                dt = lookup.UpdateLookupDetails(lookupDetail.Lookup_Details_Id, lookupDetail.Lookup_Id, lookupDetail.Description);
+                dt = lookup.UpdateLookupDetails(lookupDetail.Lookup_Details_Id, lookupDetail.Lookup_Id, lookupDetail.Description, lookupDetail.ColorName);
                 return new JsonResult("Updated Successfully");
             }
             return new JsonResult("LookupDetailId is not valid");
 
         }
+
         // DELETE api/<LookupController>/5
         [HttpDelete("{id}")]
         [Route("api/Lookup/DeleteLookupDetails")]
@@ -315,6 +316,5 @@ namespace VastraIndiaWebAPI.Controllers
             return new JsonResult(parentRow);
         }
         // Lookup Details Pagination End
-
     }
 }
