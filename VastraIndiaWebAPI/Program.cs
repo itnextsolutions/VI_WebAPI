@@ -23,8 +23,8 @@ builder.Services.AddAuthentication(opt => {
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = "https://localhost:4200",
-            ValidAudience = "https://localhost:4200",
+            ValidIssuer = "https://localhost:7181",
+            ValidAudience = "https://localhost:7181",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"))
         };
     });
@@ -65,7 +65,7 @@ if (app.Environment.IsDevelopment())
 
 
 //app.UseMiddleware<ApiKeyMiddleware>();
-app.UseCors("corspolicy");
+//app.UseCors("corspolicy");
 
 app.UseHttpsRedirection();
 
@@ -76,9 +76,12 @@ app.UseStaticFiles(new StaticFileOptions()
     RequestPath = new PathString("/Resources")
 });
 
-app.UseAuthorization();
-app.UseAuthentication();
 app.UseCors("EnableCORS");
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
 
 app.MapControllers();
 

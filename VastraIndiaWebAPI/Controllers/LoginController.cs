@@ -61,8 +61,8 @@ namespace VastraIndiaWebAPI.Controllers
                     var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"));
                     var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
                     var tokeOptions = new JwtSecurityToken(
-                        issuer: "https://localhost:4200",
-                        audience: "https://localhost:4200",
+                        issuer: "https://localhost:7181",
+                        audience: "https://localhost:7181",
                         claims: new List<Claim>(),
                         expires: DateTime.Now.AddMinutes(5),
                         signingCredentials: signinCredentials
@@ -77,7 +77,7 @@ namespace VastraIndiaWebAPI.Controllers
 
             //return new JsonResult("Invalid UserName & Password");
 
-            return Unauthorized();
+            return Unauthorized("Invalid Password");
         }
         // PUT api/<LoginController>/5
         [HttpPut("{id}")]
