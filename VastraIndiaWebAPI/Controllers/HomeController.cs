@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Nancy.Json;
@@ -46,8 +47,11 @@ namespace VastraIndiaWebAPI.Controllers
         }
 
         /* Menu Binding */
-        [HttpGet]
+
+        [HttpGet, Authorize]
+       
         [Route("api/Home/GetMenuList")]
+       
         public JsonResult GetMenuList()
         {
             dt = objHomeDAL.GetMenuList();
